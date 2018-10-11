@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "mongo-start": "docker rm some-mongo && docker run --name some-mongo -v $(pwd)/data:/data/db -d -p27017:27017  mongo"
+    "mongo-start": "docker rm todo-mongo && docker run --name todo-mongo -v $(pwd)/data:/data/db -d -p27017:27017 mongo"
   },
   "author": "",
   "license": "ISC",
