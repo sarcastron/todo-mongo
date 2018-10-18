@@ -5,11 +5,14 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "mongo-start": "docker rm todo-mongo && docker run --name todo-mongo -v $(pwd)/data:/data/db -d -p27017:27017 mongo"
+    "mongo-start": "docker rm todo-mongo; docker run --name todo-mongo -v $(pwd)/data:/data/db -d -p27017:27017 mongo"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "mongodb": "^2.2.5"
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4",
+    "mongodb": "^2.2.5",
+    "mongoose": "^4.5.9"
   }
 }
