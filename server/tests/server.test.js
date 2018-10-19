@@ -1,13 +1,14 @@
 const assert = require('chai').assert;
 const request = require('supertest');
+const { ObjectID } = require('mongodb');
 
 const { app } = require('../server');
 const { Todo } = require('../models/Todo');
 
 const todoSeedData = [
-  { text: 'Dummy todo for testing' },
-  { text: 'Another dummy todo for testing' },
-  { text: 'Last todo for testing' },
+  { _id: new ObjectID(), text: 'Dummy todo for testing' },
+  { _id: new ObjectID(), text: 'Another dummy todo for testing' },
+  { _id: new ObjectID(), text: 'Last todo for testing' },
 ];
 
 beforeEach((done) => {
@@ -66,6 +67,32 @@ describe('GET /todos', () => {
       .expect((res) => {
         assert.equal(res.body.todos.length, 3);
       })
-      .end(done());
+      .end(done);
+  });
+});
+
+describe('GET /todos/:id', () => {
+  it('Should return a specific todo doc', (done) => {
+    request(app)
+      .get(`/todos/${todoSeedData[0]._id.toHexString()}`)
+      .expect(200)
+      .expect((res) => {
+        assert.equal(res.body.todo.text, todoSeedData[0].text);
+      })
+      .end(done);
+  });
+
+  it('Should return a 404 if todo is not found', (done) => {
+    request(app)
+      .get(`/todos/4bc968fc92a00e7b19dedf00`)
+      .expect(404)
+      .end(done);
+  });
+
+  it('Should return a 404 for non-object ids', (done) => {
+    request(app)
+      .get(`/todos/1234566`)
+      .expect(404)
+      .end(done);
   });
 });
