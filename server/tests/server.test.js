@@ -7,7 +7,12 @@ const { Todo } = require('../models/Todo');
 
 const todoSeedData = [
   { _id: new ObjectID(), text: 'Dummy todo for testing' },
-  { _id: new ObjectID(), text: 'Another dummy todo for testing' },
+  {
+    _id: new ObjectID(),
+    text: 'Another dummy todo for testing',
+    completed: true,
+    completedAt: 1539934961156
+  },
   { _id: new ObjectID(), text: 'Last todo for testing' },
 ];
 
@@ -119,6 +124,34 @@ describe('DELETE /todos/:id', () => {
     request(app)
       .delete(`/todos/1234566`)
       .expect(404)
+      .end(done);
+  });
+});
+
+describe('PATCH /todos/:id', () => {
+  it('Should Update the todo', (done) => {
+    const text = 'Updated text!';
+    request(app)
+      .patch(`/todos/${todoSeedData[0]._id.toHexString()}`)
+      .send({ completed: true, text})
+      .expect(200)
+      .expect((res) => {
+        assert.equal(res.body.todo.text, text);
+        assert.isTrue(res.body.todo.completed);
+        assert.isNumber(res.body.todo.completedAt);
+      })
+      .end(done);
+  });
+
+  it('Should set all data appropriately when completed set to false', (done) => {
+    request(app)
+      .patch(`/todos/${todoSeedData[1]._id.toHexString()}`)
+      .send({ completed: false })
+      .expect(200)
+      .expect((res) => {
+        assert.isFalse(res.body.todo.completed);
+        assert.isNull(res.body.todo.completedAt);
+      })
       .end(done);
   });
 });
