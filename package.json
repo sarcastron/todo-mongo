@@ -4,9 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "node server/server.js",
     "test": "mocha server/**/*.test.js",
     "test:watch": "nodemon --exec \"npm test\"",
     "mongo-start": "docker rm todo-mongo; docker run --name todo-mongo -v $(pwd)/data:/data/db -d -p27017:27017 mongo"
+  },
+  "engines": {
+    "node": "10.11.0"
   },
   "author": "",
   "license": "ISC",
