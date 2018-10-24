@@ -7,6 +7,7 @@ const _ = require('lodash');
 const { mongoose } = require('./db/mongoose');
 const { Todo } = require('./models/Todo');
 const { User } = require('./models/User');
+const { authenticate } = require('./middleware/authenticate');
 
 const app = express();
 const PORT  = process.env.PORT || 3000;
@@ -82,7 +83,6 @@ app.patch('/todos/:id', (req, res) => {
     }).catch(err => res.status(500).send());
 });
 
-// POST /users
 app.post('/users', (req, res) => {
   const userData = _.pick(req.body, ['email', 'password']);
   const user = new User(userData);
@@ -91,6 +91,10 @@ app.post('/users', (req, res) => {
     .then(() => user.generateAuthToken())
     .then(token => res.header('x-auth', token).status(201).send(user))
     .catch(err => res.status(400).send(err));
+});
+
+app.get('/users/me', authenticate, (req, res) => {
+  return res.send(req.user);
 });
 
 app.listen(PORT, () => {
