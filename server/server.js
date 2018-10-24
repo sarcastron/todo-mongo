@@ -82,6 +82,17 @@ app.patch('/todos/:id', (req, res) => {
     }).catch(err => res.status(500).send());
 });
 
+// POST /users
+app.post('/users', (req, res) => {
+  const userData = _.pick(req.body, ['email', 'password']);
+  const user = new User(userData);
+
+  user.save()
+    .then(() => user.generateAuthToken())
+    .then(token => res.header('x-auth', token).status(201).send(user))
+    .catch(err => res.status(400).send(err));
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}...`);
 });
