@@ -4,23 +4,16 @@ const { ObjectID } = require('mongodb');
 
 const { app } = require('../server');
 const { Todo } = require('../models/Todo');
+const { User } = require('../models/User');
+const {
+  todoSeedData,
+  populateTodos,
+  users,
+  populateUsers,
+} = require('./seed/seed');
 
-const todoSeedData = [
-  { _id: new ObjectID(), text: 'Dummy todo for testing' },
-  {
-    _id: new ObjectID(),
-    text: 'Another dummy todo for testing',
-    completed: true,
-    completedAt: 1539934961156
-  },
-  { _id: new ObjectID(), text: 'Last todo for testing' },
-];
-
-beforeEach((done) => {
-  Todo.remove({}).then(() => {
-    return Todo.insertMany(todoSeedData);
-  }).then(() => done());
-});
+// beforeEach(populateUsers);
+beforeEach(populateTodos);
 
 describe('POST /todos', () => {
   it('Should create a new Todo', (done) => {
@@ -152,6 +145,76 @@ describe('PATCH /todos/:id', () => {
         assert.isFalse(res.body.todo.completed);
         assert.isNull(res.body.todo.completedAt);
       })
+      .end(done);
+  });
+});
+
+describe('GET /users/me', () => {
+  beforeEach(populateUsers);
+
+  it('Should return user if authenticated.', (done) => {
+    request(app)
+      .get('/users/me')
+      .set('x-auth', users[0].tokens[0].token)
+      .expect(200)
+      .expect((res) => {
+        const { _id, email } = res.body;
+        assert.equal(_id, users[0]._id.toHexString());
+        assert.equal(email, users[0].email);
+      })
+      .end(done);
+  });
+
+  it('Should return 401 if not authenticated.', (done) => {
+    request(app)
+      .get('/users/me')
+      .expect(401)
+      .expect((res) => {
+        assert.equal(res.body.message, 'jwt must be provided');
+      })
+      .end(done);
+  });
+});
+
+describe('POST /users', () => {
+  beforeEach(populateUsers);
+
+  it('Should create a user.', (done) => {
+    let userData = { email: 'test@example.com', password: 'qweasdzxc' };
+    request(app)
+      .post('/users')
+      .send(userData)
+      .expect(201)
+      .expect((res) => {
+        assert.exists(res.headers['x-auth']);
+        assert.equal(res.body.email, userData.email);
+      })
+      .end((err) => {
+        if (err) {
+          return done(err);
+        }
+
+        User.findOne({ email: userData.email }).then((user) => {
+          assert.exists(user);
+          assert.notEqual(user.password, userData.password);
+          done();
+        });
+      });
+  });
+
+  it('Should return validation errors if request not valid.', (done) => {
+    request(app)
+      .post('/users')
+      .send({ email: 'derp', password: 'something' })
+      .expect(400)
+      .end(done);
+  });
+
+  it('Should not create a user if the email is in use.', (done) => {
+    request(app)
+      .post('/users')
+      .send({ email: 'somedude@test.fake', password: 'derpderp' })
+      .expect(400)
       .end(done);
   });
 });
