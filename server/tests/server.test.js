@@ -198,7 +198,7 @@ describe('POST /users', () => {
           assert.exists(user);
           assert.notEqual(user.password, userData.password);
           done();
-        });
+        }).catch(err => done(err));;
       });
   });
 
@@ -216,5 +216,51 @@ describe('POST /users', () => {
       .send({ email: 'somedude@test.fake', password: 'derpderp' })
       .expect(400)
       .end(done);
+  });
+});
+
+describe('POST /users/login', () => {
+  beforeEach(populateUsers);
+
+  it('Should login a user and return an auth token', (done) => {
+    const { email, password } = users[1];
+    request(app)
+      .post('/users/login')
+      .send({ email, password })
+      .expect(200)
+      .expect((res) => {
+        assert.exists(res.headers['x-auth'])
+      })
+      .end((err, res) => {
+        if (err) {
+          return done(err);
+        }
+
+        User.findById(users[1]._id).then((user) => {
+          assert.equal('auth', user.tokens[0].access);
+          assert.equal(res.headers['x-auth'], user.tokens[0].token);
+          done();
+        }).catch(err => done(err));
+      });
+  });
+
+  it('Should reject invalid login', (done) => {
+    request(app)
+      .post('/users/login')
+      .send({ email: 'derp@herp.com', password: 'nope.Wrong!' })
+      .expect(400)
+      .expect((res) => {
+        assert.notExists(res.headers['x-auth'])
+      })
+      .end((err, res) => {
+        if (err) {
+          return done(err);
+        }
+
+        User.findById(users[1]._id).then((user) => {
+          assert.equal(0, user.tokens.length);
+          done();
+        }).catch(err => done(err));
+      });
   });
 });

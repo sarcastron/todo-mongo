@@ -90,7 +90,7 @@ app.post('/users', (req, res) => {
   user.save()
     .then(() => user.generateAuthToken())
     .then(token => res.header('x-auth', token).status(201).send(user))
-    .catch(err => res.status(400));
+    .catch(err => res.status(400).send());
 });
 
 app.get('/users/me', authenticate, (req, res) => {
