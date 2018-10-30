@@ -1,0 +1,12 @@
+{
+  "test": {
+    "PORT": <Number>
+    "MONGODB_URI": "mongodb://host:port/<AppNameTest>",
+    "JWT_SECRET": "S0m3_R4ndom_C0dez!"
+  },
+  "development": {
+    "PORT": <Number>,
+    "MONGODB_URI": "mongodb://host:port/<AppName>",
+    "JWT_SECRET": "S0m3_R4ndom_C0dez!"
+  }
+}
